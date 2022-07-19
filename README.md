@@ -22,4 +22,4 @@ Few options are available:
 
 - `-t`/`--targer_folder`: Specify where to generate the files, if not specified the files will be generated at `./course/content`
 - `-c`/`--clean`: Deletes the target folder before rendering
-- `f`/`--force`: Doesn't ask for confirmation before deleting the target folder or overwriting the files
+- `-f`/`--force`: Doesn't ask for confirmation before deleting the target folder or overwriting the files
