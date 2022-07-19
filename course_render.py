@@ -11,7 +11,7 @@ def close_section(root_path, chapter, section_title, section_content, force):
             return
     if section_content:
         with open(file_name, 'w') as new_f:
-            new_f.write(section_content)
+            new_f.write(section_content.strip())
 
 
 def format_name(name):
@@ -36,10 +36,11 @@ def render(source, targer_folder, clean, force):
     root_path = targer_folder
 
     if clean:
-        if not force and os.path.exists(root_path):
-            if not click.confirm('The folder {} and all its content will be deleted, do you want to continue?'.format(root_path), abort=True):
-                return
-        rmtree(root_path)
+        if os.path.exists(root_path):
+            if not force:
+                if not click.confirm('The folder {} and all its content will be deleted, do you want to continue?'.format(root_path), abort=True):
+                    return
+            rmtree(root_path)
 
     if not os.path.exists(root_path):
         os.makedirs(root_path)
