@@ -81,10 +81,10 @@ def render(source, targer_folder, clean, force):
         else:
             if line.strip():
                 section_not_empty = True
-                text = line
-                if re.match(r'^####* ', line):
-                    text = line[2:]
-                section_content += text
+            text = line
+            if re.match(r'^####* ', line):
+                text = line[2:]
+            section_content += text
 
     f.close()
     # Last section
