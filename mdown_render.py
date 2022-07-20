@@ -4,19 +4,38 @@ import re
 from shutil import rmtree
 
 
-def close_section(root_path, chapter, section_title, section_content, force):
-    file_name = os.path.join(root_path, chapter, section_title + '.md')
-    if not force and os.path.exists(file_name):
-        if not click.confirm('The file {} already exists and will be overwritten, do you want to continue?'.format(file_name)):
+def close_section(root_path, chapter, section_cnt, section_title, section_content, force, t_o_c):
+    file_name = "{:02d}".format(section_cnt) + "-" + format_name(section_title) + '.md'
+    file_path = os.path.join(root_path, chapter, file_name)
+    rel_path = os.path.join(".", chapter, file_name)
+    link = create_link(remove_hashtags(section_title), rel_path)
+    t_o_c.append("  * " + link)
+    if not force and os.path.exists(file_path):
+        if not click.confirm('The file {} already exists and will be overwritten, do you want to continue?'.format(file_path)):
             return
     if section_content:
-        with open(file_name, 'w') as new_f:
+        with open(file_path, 'w') as new_f:
             new_f.write(section_content.strip())
 
 
-def format_name(name):
+def create_link(text, target):
+    return f"[{text}]({target})"
+
+
+def generate_table_of_contents(path, t_o_c):
+    text = "\n".join(t_o_c)
+    file_path = os.path.join(path, 'Table_Of_Contents.md')
+    with open(file_path, 'w') as new_f:
+        new_f.write(text)
+
+
+def remove_hashtags(name):
     # Remove all # and the first space at the beginning
-    name = re.sub(r'^#* ', '', name)
+    return re.sub(r'^#* ', '', name).strip()
+
+
+def format_name(name):
+    name = remove_hashtags(name)
     # Substitute the space char with _
     name = name.replace(' ', '_')
     # Remove all non-word characters
@@ -46,6 +65,7 @@ def render(source, targer_folder, clean, force):
         os.makedirs(root_path)
 
     f = open(source, "r")
+    t_o_c = ["# Table of contents"]
     chapter = ""
     section_title = ""
     section_content = ""
@@ -56,26 +76,30 @@ def render(source, targer_folder, clean, force):
         if line.startswith("# "):
             # Close previous section and create new chapter
             if section_not_empty:
-                close_section(root_path, chapter, section_title, section_content, force)
+                close_section(root_path, chapter, section_cnt, section_title, section_content, force, t_o_c)
                 section_cnt += 1
                 section_not_empty = False
             section_cnt = 0
+            # Add to table of contents
             chapter_name = format_name(line)
             chapter = "{:02d}".format(chapter_cnt) + "-" + chapter_name
             chapter_path = os.path.join(root_path, chapter)
+            rel_path = os.path.join(".", chapter)
+            link = create_link(remove_hashtags(line), rel_path)
+            t_o_c.append("* " + link)
             chapter_cnt += 1
             if not os.path.exists(chapter_path):
                 os.mkdir(chapter_path)
             section_content = line
-            section_title = "{:02d}".format(section_cnt) + "-" + chapter_name
+            section_title = line
 
         elif line.startswith("## "):
             # Close current section and start a new one
             if section_not_empty:
-                close_section(root_path, chapter, section_title, section_content, force)
+                close_section(root_path, chapter, section_cnt, section_title, section_content, force, t_o_c)
                 section_cnt += 1
                 section_not_empty = False
-            section_title = "{:02d}".format(section_cnt) + "-" + format_name(line)
+            section_title = line
             section_content = line[1:]
 
         else:
@@ -88,7 +112,9 @@ def render(source, targer_folder, clean, force):
 
     f.close()
     # Last section
-    close_section(root_path, chapter, section_title, section_content, force)
+    close_section(root_path, chapter, section_cnt, section_title, section_content, force, t_o_c)
+    # Table of contents
+    generate_table_of_contents(root_path, t_o_c)
 
 
 if __name__ == "__main__":
