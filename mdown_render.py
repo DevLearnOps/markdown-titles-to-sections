@@ -22,8 +22,8 @@ def create_link(text, target):
     return f"[{text}]({target})"
 
 
-def generate_table_of_contents(path, T_O_C):
-    text = "\n".join(T_O_C)
+def generate_table_of_contents(path, t_o_c):
+    text = "\n".join(t_o_c)
     file_path = os.path.join(path, 'Table_Of_Contents.md')
     with open(file_path, 'w') as new_f:
         new_f.write(text)
