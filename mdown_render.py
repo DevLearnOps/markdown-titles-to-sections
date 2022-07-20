@@ -49,30 +49,42 @@ def render(source, targer_folder, clean, force):
     chapter = ""
     section_title = ""
     section_content = ""
+    section_not_empty = False
+    chapter_cnt = 0
+    section_cnt = 0
     for line in f:
         if line.startswith("# "):
             # Close previous section and create new chapter
-            if section_content:
+            if section_not_empty:
                 close_section(root_path, chapter, section_title, section_content, force)
-                section_content = ""
-                section_title = ""
-
-            chapter = format_name(line)
+                section_cnt += 1
+                section_not_empty = False
+            section_cnt = 0
+            chapter_name = format_name(line)
+            chapter = "{:02d}".format(chapter_cnt) + "-" + chapter_name
             chapter_path = os.path.join(root_path, chapter)
+            chapter_cnt += 1
             if not os.path.exists(chapter_path):
                 os.mkdir(chapter_path)
+            section_content = line
+            section_title = "{:02d}".format(section_cnt) + "-" + chapter_name
 
         elif line.startswith("## "):
             # Close current section and start a new one
-            if section_content:
+            if section_not_empty:
                 close_section(root_path, chapter, section_title, section_content, force)
-                section_content = ""
-            section_title = format_name(line)
+                section_cnt += 1
+                section_not_empty = False
+            section_title = "{:02d}".format(section_cnt) + "-" + format_name(line)
+            section_content = line[1:]
 
         else:
-            # Exclude the text between chapter name and section title
-            if section_title:
-                section_content += line
+            if line.strip():
+                section_not_empty = True
+                text = line
+                if re.match(r'^####* ', line):
+                    text = line[2:]
+                section_content += text
 
     f.close()
     # Last section
