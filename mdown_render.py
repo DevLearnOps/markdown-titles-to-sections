@@ -9,7 +9,7 @@ def close_section(root_path, chapter, section_cnt, section_title, section_conten
     file_path = os.path.join(root_path, chapter, file_name)
     rel_path = os.path.join(".", chapter, file_name)
     link = create_link(remove_hashtags(section_title), rel_path)
-    t_o_c.append("      * " + link)
+    t_o_c.append("  * " + link)
     if not force and os.path.exists(file_path):
         if not click.confirm('The file {} already exists and will be overwritten, do you want to continue?'.format(file_path)):
             return
@@ -86,7 +86,7 @@ def render(source, targer_folder, clean, force):
             chapter_path = os.path.join(root_path, chapter)
             rel_path = os.path.join(".", chapter)
             link = create_link(remove_hashtags(line), rel_path)
-            t_o_c.append("  * " + link)
+            t_o_c.append("* " + link)
             chapter_cnt += 1
             if not os.path.exists(chapter_path):
                 os.mkdir(chapter_path)
